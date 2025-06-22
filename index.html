@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bewertungs-Tool (Portfolio Version)</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      h2 {
+        text-align: center;
+        color: #0056b3;
+      }
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .kriterien-list {
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+      }
+      .kriterium-item {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .kriterium-label-input {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .kriterium-label-input input {
+        flex-grow: 1;
+        margin-top: 0;
+      }
+      .rating-buttons {
+        display: flex;
+        justify-content: flex-start;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .rating-buttons button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e2e6ea;
+        color: #333;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0; /* Prevent buttons from shrinking */
+      }
+      .rating-buttons button.selected {
+        background-color: #28a745;
+        color: white;
+      }
+      .result {
+        margin-top: 25px;
+        padding: 15px;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-weight: bold;
+        text-align: center;
+        color: #0056b3;
+      }
+      .remove-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        align-self: flex-end; /* Align to the right within the flex column */
+        width: auto; /* Adjust width for smaller buttons */
+        margin-top: 0;
+      }
+      .remove-btn:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📝 Mein Bewertungs-Tool</h2>
+
+    <label for="mainTopic">Was möchtest du bewerten?</label>
+    <input
+      type="text"
+      id="mainTopic"
+      placeholder="z.B. 'Neuer Film', 'Software-Feature'"
+    />
+
+    <div class="kriterien-list" id="kriterienContainer">
+      </div>
+
+    <button onclick="addCustomCriterion()">➕ Kriterium hinzufügen</button>
+
+    <button onclick="calculateAverage()">Ergebnis berechnen</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+      function addCriterionInput() {
+        const container = document.getElementById("kriterienContainer");
+        const wrapper = document.createElement("div");
+        wrapper.className = "kriterium-item";
+
+        const criterionInputWrapper = document.createElement("div");
+        criterionInputWrapper.className = "kriterium-label-input";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "Name des Kriteriums (z.B. 'Handlung', 'Design')";
+        input.className = "criterion-name-input"; // Add a class for easy selection
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "✖️";
+        removeBtn.className = "remove-btn";
+        removeBtn.onclick = () => wrapper.remove();
+
+        criterionInputWrapper.appendChild(input);
+        criterionInputWrapper.appendChild(removeBtn);
+
+        const ratingButtonsDiv = document.createElement("div");
+        ratingButtonsDiv.className = "rating-buttons";
+
+        for (let i = 1; i <= 6; i++) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = i;
+          btn.onclick = function () {
+            // Remove 'selected' class from all buttons in this group
+            Array.from(ratingButtonsDiv.children).forEach((button) =>
+              button.classList.remove("selected")
+            );
+            // Add 'selected' class to the clicked button
+            this.classList.add("selected");
+            ratingButtonsDiv.setAttribute("data-rating", i);
+          };
+          ratingButtonsDiv.appendChild(btn);
+        }
+
+        wrapper.appendChild(criterionInputWrapper);
+        wrapper.appendChild(ratingButtonsDiv);
+        container.appendChild(wrapper);
+      }
+
+      function addCustomCriterion() {
+        addCriterionInput(); // Fügt ein neues, leeres Kriterium hinzu
+      }
+
+      function calculateAverage() {
+        const ratingDivs = document.querySelectorAll(".rating-buttons");
+        const results = [];
+        let total = 0;
+        let count = 0;
+
+        ratingDivs.forEach((div) => {
+          const rating = parseInt(div.getAttribute("data-rating"));
+          // Ensure a valid rating is selected (1-6)
+          if (!isNaN(rating) && rating >= 1 && rating <= 6) {
+            const criterionNameInput = div.parentElement.querySelector(
+              ".criterion-name-input"
+            );
+            const name = criterionNameInput
+              ? criterionNameInput.value.trim()
+              : "Unbenanntes Kriterium";
+            results.push(`${name}: Note ${rating}`);
+            total += rating;
+            count++;
+          }
+        });
+
+        const resultBox = document.getElementById("result");
+        if (count > 0) {
+          const average = (total / count).toFixed(2);
+          resultBox.textContent = `Durchschnitt: ${average} (${results.join(
+            ", "
+          )})`;
+        } else {
+          resultBox.textContent =
+            "Bitte gib oben ein Thema ein und füge Kriterien hinzu, um zu bewerten!";
+        }
+      }
+
+      // Initial ein leeres Kriterium beim Laden der Seite hinzufügen
+      window.onload = function () {
+        addCriterionInput();
+      };
+    </script>
+  </body>
+</html>

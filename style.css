@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bewertungs-Tool (Portfolio Version)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@404&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #3498db; /* Helles Blau */
+        --primary-dark-color: #2980b9; /* Dunkleres Blau für Hover */
+        --secondary-color: #2ecc71; /* Grünton für ausgewählte Noten */
+        --background-light: #ecf0f1; /* Sehr helles Grau */
+        --background-dark: #bdc3c7; /* Dunkleres Grau */
+        --text-color: #2c3e50; /* Dunkelblau-grau */
+        --border-color: #dcdcdc; /* Heller Rand */
+        --shadow-light: rgba(0, 0, 0, 0.1);
+        --shadow-medium: rgba(0, 0, 0, 0.15);
+      }
+
+      body {
+        font-family: 'Roboto', Arial, sans-serif;
+        padding: 20px;
+        max-width: 700px; /* Etwas breiter für besseren Inhalt */
+        margin: 20px auto; /* Etwas Abstand oben/unten */
+        background-color: var(--background-light);
+        color: var(--text-color);
+        line-height: 1.6;
+        box-shadow: 0 4px 15px var(--shadow-medium); /* Leichter Schatten für den Body-Container */
+        border-radius: 8px;
+        position: relative; /* Für mögliche zukünftige Elemente */
+      }
+
+      h2 {
+        text-align: center;
+        color: var(--primary-dark-color);
+        margin-bottom: 30px;
+        font-size: 2.2em;
+        position: relative;
+        padding-bottom: 10px;
+      }
+      h2::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary-color);
+        margin: 10px auto 0;
+        border-radius: 2px;
+      }
+
+      label {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        font-weight: 500; /* Etwas dickerer Font */
+        color: var(--primary-dark-color);
+        font-size: 1.1em;
+      }
+
+      input[type="text"],
+      button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        box-sizing: border-box;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1em;
+        outline: none; /* Entfernt den blauen Rahmen beim Fokus */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      input[type="text"]:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Sanfter Fokus-Schatten */
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        margin-top: 15px; /* Etwas mehr Abstand */
+        font-weight: bold;
+      }
+      button:hover {
+        background-color: var(--primary-dark-color);
+        transform: translateY(-2px); /* Leichter "Lift"-Effekt */
+        box-shadow: 0 4px 10px var(--shadow-light);
+      }
+      button:active {
+        transform: translateY(0); /* Zurück auf Originalposition */
+      }
+
+      .kriterien-list {
+        margin-top: 30px;
+        border-top: 1px dashed var(--border-color); /* Gestrichelte Linie */
+        padding-top: 25px;
+      }
+      .kriterium-item {
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 2px 8px var(--shadow-light); /* Leichter Schatten */
+        transition: transform 0.2s ease;
+      }
+      .kriterium-item:hover {
+        transform: translateY(-3px); /* Leichter Lift beim Hover */
+      }
+
+      .kriterium-label-input {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .kriterium-label-input input {
+        flex-grow: 1;
+        margin-top: 0;
+        margin-bottom: 0; /* Entfernt unnötigen Margin */
+      }
+      .rating-buttons {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px; /* Mehr Abstand zwischen den Buttons */
+        flex-wrap: wrap; /* Buttons können umbrechen */
+      }
+      .rating-buttons button {
+        width: 45px; /* Etwas größere Buttons */
+        height: 45px;
+        border-radius: 50%;
+        background-color: var(--background-dark); /* Neutraler Hintergrund */
+        color: var(--text-color);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1em;
+        flex-shrink: 0;
+        box-shadow: 0 2px 5px var(--shadow-light); /* Kleiner Schatten */
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .rating-buttons button:hover:not(.selected) {
+        background-color: #b0b0b0; /* Leichter Hover-Effekt */
+        transform: scale(1.05);
+      }
+      .rating-buttons button.selected {
+        background-color: var(--secondary-color); /* Grüner bei Auswahl */
+        color: white;
+        transform: scale(1.1); /* Deutlicherer Pop-Effekt */
+        box-shadow: 0 3px 8px rgba(46, 204, 113, 0.4); /* Grüner Schatten bei Auswahl */
+      }
+      .rating-buttons button.selected:hover {
+        background-color: #27ae60; /* Dunkleres Grün beim Hover der ausgewählten Note */
+      }
+
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #eaf6fd; /* Sehr helles Blau */
+        border: 1px solid var(--primary-color);
+        border-radius: 8px;
+        font-weight: 600; /* Etwas dicker */
+        text-align: center;
+        color: var(--primary-dark-color);
+        font-size: 1.2em;
+        box-shadow: 0 4px 12px var(--shadow-light);
+      }
+
+      .remove-btn {
+        background-color: #e74c3c; /* Kräftiges Rot */
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        align-self: flex-end;
+        width: auto;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        margin-top: 0; /* Sicherstellen, dass kein zusätzlicher Margin entsteht */
+        flex-shrink: 0; /* Damit der Button nicht schrumpft */
+      }
+      .remove-btn:hover {
+        background-color: #c0392b; /* Dunkleres Rot beim Hover */
+        transform: translateY(-1px);
+      }
+
+      /* Responsivität */
+      @media (max-width: 768px) {
+        body {
+          margin: 10px auto;
+          padding: 15px;
+        }
+        h2 {
+          font-size: 1.8em;
+          margin-bottom: 20px;
+        }
+        .kriterium-item {
+          padding: 12px;
+        }
+        .rating-buttons button {
+          width: 40px;
+          height: 40px;
+          font-size: 1em;
+        }
+        input[type="text"],
+        button {
+            padding: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+        h2 {
+          font-size: 1.5em;
+          margin-bottom: 15px;
+        }
+        .rating-buttons {
+          justify-content: center; /* Zentriert die Buttons auf kleinen Bildschirmen */
+        }
+        .rating-buttons button {
+          width: 35px;
+          height: 35px;
+          font-size: 0.9em;
+        }
+        .remove-btn {
+          padding: 6px 10px;
+          font-size: 0.8em;
+        }
+        .result {
+          font-size: 1em;
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📝 Mein Bewertungs-Tool</h2>
+
+    <label for="mainTopic">Was möchtest du bewerten?</label>
+    <input
+      type="text"
+      id="mainTopic"
+      placeholder="z.B. 'Neuer Film', 'Software-Feature'"
+    />
+
+    <div class="kriterien-list" id="kriterienContainer">
+      </div>
+
+    <button onclick="addCustomCriterion()">➕ Kriterium hinzufügen</button>
+
+    <button onclick="calculateAverage()">Ergebnis berechnen</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+      function addCriterionInput() {
+        const container = document.getElementById("kriterienContainer");
+        const wrapper = document.createElement("div");
+        wrapper.className = "kriterium-item";
+
+        const criterionInputWrapper = document.createElement("div");
+        criterionInputWrapper.className = "kriterium-label-input";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "Name des Kriteriums (z.B. 'Handlung', 'Design')";
+        input.className = "criterion-name-input"; // Add a class for easy selection
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "✖️";
+        removeBtn.className = "remove-btn";
+        removeBtn.onclick = () => wrapper.remove();
+
+        criterionInputWrapper.appendChild(input);
+        criterionInputWrapper.appendChild(removeBtn);
+
+        const ratingButtonsDiv = document.createElement("div");
+        ratingButtonsDiv.className = "rating-buttons";
+
+        for (let i = 1; i <= 6; i++) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = i;
+          btn.onclick = function () {
+            // Remove 'selected' class from all buttons in this group
+            Array.from(ratingButtonsDiv.children).forEach((button) =>
+              button.classList.remove("selected")
+            );
+            // Add 'selected' class to the clicked button
+            this.classList.add("selected");
+            ratingButtonsDiv.setAttribute("data-rating", i);
+          };
+          ratingButtonsDiv.appendChild(btn);
+        }
+
+        wrapper.appendChild(criterionInputWrapper);
+        wrapper.appendChild(ratingButtonsDiv);
+        container.appendChild(wrapper);
+      }
+
+      function addCustomCriterion() {
+        addCriterionInput(); // Fügt ein neues, leeres Kriterium hinzu
+      }
+
+      function calculateAverage() {
+        const ratingDivs = document.querySelectorAll(".rating-buttons");
+        const results = [];
+        let total = 0;
+        let count = 0;
+
+        ratingDivs.forEach((div) => {
+          const rating = parseInt(div.getAttribute("data-rating"));
+          // Ensure a valid rating is selected (1-6)
+          if (!isNaN(rating) && rating >= 1 && rating <= 6) {
+            const criterionNameInput = div.parentElement.querySelector(
+              ".criterion-name-input"
+            );
+            const name = criterionNameInput
+              ? criterionNameInput.value.trim()
+              : "Unbenanntes Kriterium";
+            results.push(`${name}: Note ${rating}`);
+            total += rating;
+            count++;
+          }
+        });
+
+        const resultBox = document.getElementById("result");
+        if (count > 0) {
+          const average = (total / count).toFixed(2);
+          resultBox.innerHTML = `**Dein Ergebnis:** ${average} &nbsp; ✨<br><small>(${results.join(
+            ", "
+          )})</small>`; /* HTML für bessere Formatierung */
+        } else {
+          resultBox.textContent =
+            "Bitte gib oben ein Thema ein und füge Kriterien hinzu, um zu bewerten!";
+        }
+      }
+
+      // Initial ein leeres Kriterium beim Laden der Seite hinzufügen
+      window.onload = function () {
+        addCriterionInput();
+      };
+    </script>
+  </body>
+</html>
