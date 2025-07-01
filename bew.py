@@ -1,11 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS # Die ist wichtig, damit deine Webseite mit dem Server quatschen kann
 
+# Deine Flask-App wird gestartet
 app = Flask(__name__)
+CORS(app) # Und hier sorgen wir direkt dafür, dass die Kommunikation reibungslos läuft
 
+# Das ist jetzt die Haupt-Adresse deines Tools. Wenn jemand die aufruft, kommt deine Webseite!
 @app.route('/')
-def hello_world():
-    return "Hallo! Die Bewertungs-API läuft. Sende POST-Anfragen an /calculate_average"
+def serve_index_html():
+    return send_file('index.html')
 
+# Das hier ist deine Funktion, die die Bewertungen berechnet – die bleibt, wie sie ist.
 @app.route('/calculate_average', methods=['POST'])
 def calculate_average_api():
     try:
@@ -62,8 +67,10 @@ def calculate_average_api():
             }), 400
 
     except Exception as e:
-        app.logger.error(f"Fehler bei der Berechnung der Bewertung: {e}", exc_info=True)
+        # Falls mal was schiefgeht, sehen wir hier, was los war.
+        print(f"Fehler bei der Berechnung der Bewertung: {e}")
         return jsonify({'success': False, 'error': f'Interner Serverfehler: {str(e)}'}), 500
 
+# Das hier ist nur zum lokalen Testen auf deinem PC, Render nutzt das nicht direkt.
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
