@@ -1,1 +1,2 @@
 Flask
+Flask-Cors  # Füge diese Zeile hinzu
